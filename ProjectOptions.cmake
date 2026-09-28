@@ -595,10 +595,11 @@ set_feature_for_printers_master_board(
 set_feature_for_printers(HAS_EMERGENCY_STOP "COREONE" "COREONE_INDX" "COREONEL" "COREONEL_INDX")
 set_feature_for_printers(HAS_15GT_BELTS "COREONE" "COREONE_INDX" "COREONEL" "COREONEL_INDX" "XL")
 # The NTC and PT1000 ADC ranges overlap, so boot detection cannot tell them apart on a warm restart
+# (ambiguous readings ask the user to confirm the hotend type)
 if(DEVELOPMENT_ITEMS_ENABLED)
   set_feature_for_printers(HAS_HT_HOTEND "COREONE" "COREONEL")
 else()
-  set_feature_for_printers(HAS_HT_HOTEND)
+  set_feature_for_printers(HAS_HT_HOTEND "COREONEL")
 endif()
 set_feature_for_printers(HAS_EXPANSION_JOINTS_GEN_2 "COREONE" "COREONE_INDX")
 set_feature_for_printers(HAS_CEILING_CLEARANCE "COREONE" "COREONE_INDX" "COREONEL" "COREONEL_INDX")

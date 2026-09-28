@@ -47,7 +47,9 @@ const short temptable_1010[][2] PROGMEM = {
   // Projected values above the operating range, computed from IEC 60751 (PT1000 class B,
   // R0=1000Ω, A=3.9083e-3, B=-5.775e-7) with a 1kΩ pullup. Required so
   // MarlinTemptableRawMinMax::compute() can establish a safety threshold above
-  // the HT hotend max nozzle temperature (415°C) — without these the threshold collapses to the last real entry (400°C).
+  // the HT hotend max nozzle temperature (465°C) — without these the threshold collapses to the last real entry.
   { OV( 736), 425 },
-  { OV( 743), 450 }
+  { OV( 743), 450 },
+  { OV( 749), 475 },
+  { OV( 755), 500 }
 };

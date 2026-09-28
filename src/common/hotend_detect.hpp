@@ -6,7 +6,8 @@
 
 /// HT (PT1000) hotend nozzle-temperature ceiling. A compile-time constant (not the runtime
 /// Hotend::max_nozzle_temp()) so it can gate a static_assert on the HT filament presets.
-inline constexpr int16_t ht_hotend_max_nozzle_temp = 415;
+/// With HEATER_MAXTEMP_SAFETY_MARGIN subtracted, the highest settable target is 450 °C.
+inline constexpr int16_t ht_hotend_max_nozzle_temp = 465;
 
 /// Boot-time hotend detection may request a user confirmation dialog.
 ///
