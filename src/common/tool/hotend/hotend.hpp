@@ -9,6 +9,7 @@
 #include <module/temperature/temp_defines.hpp>
 #include <pwm_utils.hpp>
 #include <atomic>
+#include <optional>
 #include <option/has_indx.h>
 
 namespace buddy::filament_compatibility {
@@ -125,6 +126,14 @@ public:
 
     PWM255 nozzle_heater_pwm() const {
         return PWM255(nozzle_heater_pwm_);
+    }
+
+    /// Drives the nozzle heater with a fixed output instead of the regulator (for PID autotuning).
+    /// All thermal protections stay active. The override only applies while a target temperature
+    /// is set and ends when the target is turned off.
+    /// @returns false if the hotend doesn't support it
+    virtual bool set_nozzle_heater_pwm_override(std::optional<PWM255>) {
+        return false;
     }
 
 #if HAS_TEMP_HEATBREAK

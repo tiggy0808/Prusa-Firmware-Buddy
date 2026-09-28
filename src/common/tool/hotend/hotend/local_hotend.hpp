@@ -68,6 +68,8 @@ public:
     void set_heatbreak_target_temp(TargetTemperature set) override;
 #endif
 
+    bool set_nozzle_heater_pwm_override(std::optional<PWM255> pwm) override;
+
 protected:
     virtual void manage() override;
 
@@ -92,6 +94,9 @@ protected:
 #endif
 
     HotendRegulator nozzle_regulator_;
+
+    /// Heater output forced instead of the regulator output, see set_nozzle_heater_pwm_override()
+    std::optional<PWM255> nozzle_heater_pwm_override_;
 
     /// Additional filter for low temperature nozzle values
     /// Increases oversampling to improve accuracy

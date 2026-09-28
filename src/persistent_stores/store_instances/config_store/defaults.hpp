@@ -21,6 +21,7 @@
 
 #include <option/has_crash_detection.h>
 #include <option/has_hotend_type_support.h>
+#include <option/has_nozzle_pid_autotune.h>
 #if HAS_HOTEND_TYPE_SUPPORT()
     #include <hotend_type.hpp>
 #endif
@@ -238,6 +239,13 @@ namespace defaults {
 
     inline constexpr int16_t homing_sens_x { stallguard_sensitivity_unset };
     inline constexpr int16_t homing_sens_y { stallguard_sensitivity_unset };
+
+#if HAS_NOZZLE_PID_AUTOTUNE()
+    // Unscaled, in the units M301 uses
+    inline constexpr float nozzle_pid_kp = DEFAULT_Kp;
+    inline constexpr float nozzle_pid_ki = DEFAULT_Ki;
+    inline constexpr float nozzle_pid_kd = DEFAULT_Kd;
+#endif
 
 #if HAS_HOTEND_TYPE_SUPPORT()
     inline constexpr HotendType hotend_type {

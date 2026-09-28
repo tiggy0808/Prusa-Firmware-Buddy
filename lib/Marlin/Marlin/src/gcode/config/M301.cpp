@@ -27,6 +27,10 @@
     #include "../gcode.h"
     #include "../../module/temperature.h"
     #include <gcode/gcode_parser.hpp>
+    #include <option/has_nozzle_pid_autotune.h>
+    #if HAS_NOZZLE_PID_AUTOTUNE()
+        #include <nozzle_pid_store.hpp>
+    #endif
 
 /** \addtogroup G-Codes
  * @{
@@ -37,7 +41,7 @@
  *
  *#### Usage
  *
- *    M301 [ E | P | I | D | C ]
+ *    M301 [ E | P | I | D | C | R ]
  *
  *#### Parameters
  *
@@ -46,8 +50,10 @@
  * -`I` - Ki term
  * -`D` - Kd term
  * -`C` - Kc term
+ * -`R` - Reset Kp, Ki and Kd to the firmware defaults (only with nozzle PID autotune support)
  *
- * Without parameters prints the current PID parameters
+ * Without parameters prints the current PID parameters.
+ * With nozzle PID autotune support, Kp, Ki and Kd are saved and survive a restart.
  */
 void GcodeSuite::M301() {
     GCodeParser2 p;
@@ -66,6 +72,16 @@ void GcodeSuite::M301() {
     Hotend &hotend = Hotend::for_tool(tool);
 
     HotendPIDConfig pid = hotend.nozzle_pid_config();
+    #if HAS_NOZZLE_PID_AUTOTUNE()
+    const bool reset = p.option<bool>('R').value_or(false);
+    const bool save = reset || p.option<float>('P') || p.option<float>('I') || p.option<float>('D');
+    if (reset) {
+        const HotendPIDConfig defaults;
+        pid.Kp = defaults.Kp;
+        pid.Ki = defaults.Ki;
+        pid.Kd = defaults.Kd;
+    }
+    #endif
     p.store_option_if_present('P', pid.Kp);
     if (auto val = p.option<float>('I')) {
         pid.Ki = scalePID_i(*val);
@@ -78,6 +94,11 @@ void GcodeSuite::M301() {
     #endif
 
     hotend.set_nozzle_pid_config(pid);
+    #if HAS_NOZZLE_PID_AUTOTUNE()
+    if (save) {
+        nozzle_pid_store::save(pid);
+    }
+    #endif
 
     SERIAL_ECHO_START();
     if constexpr (PhysicalToolIndex::count > 1) {

@@ -97,6 +97,7 @@
 #include <option/has_ht_hotend.h>
 
 #include <option/has_hotend_type_support.h>
+#include <option/has_nozzle_pid_autotune.h>
 #if HAS_HOTEND_TYPE_SUPPORT()
     #include <hotend_type.hpp>
 #endif
@@ -785,6 +786,13 @@ struct CurrentStore
         });
     }
     #endif
+#endif
+
+#if HAS_NOZZLE_PID_AUTOTUNE()
+    /// Nozzle PID terms set by M301 or M303 U1; unscaled, in the units M301 uses
+    StoreItem<float, defaults::nozzle_pid_kp, ItemFlag::calibrations, journal::hash("Nozzle PID Kp")> nozzle_pid_kp;
+    StoreItem<float, defaults::nozzle_pid_ki, ItemFlag::calibrations, journal::hash("Nozzle PID Ki")> nozzle_pid_ki;
+    StoreItem<float, defaults::nozzle_pid_kd, ItemFlag::calibrations, journal::hash("Nozzle PID Kd")> nozzle_pid_kd;
 #endif
 
     StoreItem<int16_t, defaults::homing_sens_x, ItemFlag::calibrations | ItemFlag::common_misconfigurations, journal::hash("Homing Sens X")> homing_sens_x; // X axis homing sensitivity

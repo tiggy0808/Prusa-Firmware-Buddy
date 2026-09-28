@@ -124,6 +124,10 @@
 #include <option/has_ht_hotend.h>
 #include <option/has_uneven_bed_prompt.h>
 #include <option/has_nextruder.h>
+#include <option/has_nozzle_pid_autotune.h>
+#if HAS_NOZZLE_PID_AUTOTUNE()
+    #include <nozzle_pid_store.hpp>
+#endif
 #include <option/has_human_interactions.h>
 #include <option/has_chamber_vents.h>
 #include <option/has_motor_current_profiles.h>
@@ -1365,7 +1369,12 @@ static void settings_load() {
 #endif
 #if ENABLED(PIDTEMP)
     for (auto tool : PhysicalToolIndex::all()) {
+    #if HAS_NOZZLE_PID_AUTOTUNE()
+        static_assert(PhysicalToolIndex::count == 1, "One saved nozzle PID for all tools");
+        Hotend::for_tool(tool).set_nozzle_pid_config(nozzle_pid_store::load());
+    #else
         Hotend::for_tool(tool).set_nozzle_pid_config(HotendPIDConfig {});
+    #endif
     }
 #endif
 

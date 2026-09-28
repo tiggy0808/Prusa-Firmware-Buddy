@@ -59,9 +59,15 @@ void LocalHotend::handle_nozzle_target_change() {
     // If turning off the hotend, set the hotend off immediately
     // This shortcut was originally in Temperature::disable_heaters
     if (nozzle_target_temp_ <= 0) {
+        nozzle_heater_pwm_override_.reset();
         nozzle_heater_pwm_ = 0;
         digitalWrite(local_config_.nozzle_heater_marlin_pin, false);
     }
+}
+
+bool LocalHotend::set_nozzle_heater_pwm_override(std::optional<PWM255> pwm) {
+    nozzle_heater_pwm_override_ = pwm;
+    return true;
 }
 
 #if HAS_TEMP_HEATBREAK_CONTROL
@@ -129,6 +135,10 @@ void LocalHotend::manage() {
         }
 
         nozzle_heater_pwm_ = static_cast<uint8_t>(std::clamp<float>(std::round(regulation_result.pid_output), 0, 255));
+
+        if (nozzle_heater_pwm_override_ && nozzle_target_temp() > 0 && curr_nozzle_temp < base_config_.max_nozzle_temp) {
+            nozzle_heater_pwm_ = nozzle_heater_pwm_override_->value;
+        }
 #if ENABLED(MODEL_DETECT_STUCK_THERMISTOR)
         thermal_model_protection_.step(regulation_result.pid_output, regulation_result.feed_forward);
         thermal_model_protection_ok_ = thermal_model_protection_.is_ok();

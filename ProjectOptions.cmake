@@ -601,6 +601,8 @@ if(DEVELOPMENT_ITEMS_ENABLED)
 else()
   set_feature_for_printers(HAS_HT_HOTEND "COREONEL")
 endif()
+# Nozzle PID autotune (M303), with the PID terms saved in the config store
+set_feature_for_printers(HAS_NOZZLE_PID_AUTOTUNE "COREONEL")
 set_feature_for_printers(HAS_EXPANSION_JOINTS_GEN_2 "COREONE" "COREONE_INDX")
 set_feature_for_printers(HAS_CEILING_CLEARANCE "COREONE" "COREONE_INDX" "COREONEL" "COREONEL_INDX")
 set_feature_for_printers(
