@@ -301,6 +301,9 @@ namespace defaults {
 
 #if PRINTER_IS_PRUSA_iX()
     inline constexpr Tristate auto_recalibrate_precise_homing = Tristate::yes;
+#elif PRINTER_IS_PRUSA_COREONEL()
+    // Calibrations are optional: home without asking; calibrate from the menu when desired
+    inline constexpr Tristate auto_recalibrate_precise_homing = Tristate::no;
 #else
     inline constexpr Tristate auto_recalibrate_precise_homing = Tristate::other;
 #endif

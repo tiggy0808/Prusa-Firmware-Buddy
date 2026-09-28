@@ -30,54 +30,9 @@ enum class Action {
     _first = DoorSensor,
 };
 
-constexpr EnumBitset<Action, Action::_count> get_dependencies(Action action) {
-    auto deps = EnumBitset<Action, Action::_count> {};
-
-    // WARN: Dependencies are transitive
-    // - set only direct dependencies; do not repeat what is already implied by another dependency
-    // - when removing a dependency, dont forget to add back anything it was pulling in transitively
-    switch (action) {
-    case Action::DoorSensor:
-    case Action::Fans:
-    case Action::Gears:
-        break;
-    case Action::XCheck:
-    case Action::YCheck:
-    case Action::ZAlign:
-        deps.set(Action::DoorSensor);
-        break;
-    case Action::Heaters:
-        deps.set(Action::DoorSensor);
-        deps.set(Action::Fans);
-        break;
-    case Action::BeltTuning:
-        deps.set(Action::XCheck);
-        deps.set(Action::YCheck);
-        break;
-    case Action::FilamentSensorCalibration:
-    case Action::Loadcell:
-        deps.set(Action::XCheck);
-        deps.set(Action::YCheck);
-        deps.set(Action::Heaters);
-        break;
-#if HAS_PRECISE_HOMING_COREXY()
-    case Action::PreciseHoming:
-        deps.set(Action::BeltTuning);
-        break;
-#endif
-    case Action::ZCheck:
-        deps.set(Action::Loadcell);
-        deps.set(Action::ZAlign);
-        break;
-    case Action::PhaseSteppingCalibration:
-        deps.set(Action::ZCheck);
-        break;
-    case Action::_count:
-        debug_assert(false);
-        break;
-    }
-
-    return deps;
+/// Calibrations are optional and can be run in any order; the wizard runs them in the order of Action.
+constexpr EnumBitset<Action, Action::_count> get_dependencies(Action) {
+    return {};
 }
 
 TestResult get_test_result(Action action, ToolMask tool);

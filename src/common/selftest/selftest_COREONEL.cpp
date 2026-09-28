@@ -361,38 +361,8 @@ void CSelftest::next() {
     }
     m_State = (SelftestState_t)state;
 
-    // check, if state can run
-    // this must be done after mask check
+    // Every selected test can run regardless of the results of the others; calibrations are optional
     m_result = config_store().selftest_result.get();
-    switch (m_State) {
-// don't skip Z calibration and X and Y axis tests when loadcell fails
-// currently only disabled we might want it back
-#if 0
-    // #error dead code found by automatic analyses (see BFW-5461)
-    case stsZcalib:
-    case stsXAxis:
-    case stsYAxis: // Y is not skipped even if X fails
-        if (TestResult_t(m_result.loadcell) == TestResult_t::Passed)
-            return; // current state can be run
-        break;      // current state cannot be run
-#endif
-    case stsZAxis: { // loadcell and both X and Y must be OK to test Z
-        bool loadcell_passed = m_result.get_loadcell(0) == TestResult::passed;
-        bool xy_axis_passed = m_result.get_xaxis() == TestResult::passed && m_result.get_yaxis() == TestResult::passed;
-        if (loadcell_passed && xy_axis_passed) {
-            return; // current state can be run
-        }
-        m_result.set_zaxis(TestResult::unknown);
-        break; // current state cannot be run
-    }
-    default:
-        return; // current state can be run
-    }
-
-    // current state cannot be run
-    // call recursively: it is fine, this function is tiny and there will be few iterations
-    marlin_server::set_warning(WarningType::ActionSelftestRequired);
-    next();
 }
 
 // declared in parent source file

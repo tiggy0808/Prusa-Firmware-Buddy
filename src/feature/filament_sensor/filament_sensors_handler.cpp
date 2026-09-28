@@ -95,10 +95,12 @@ bool FilamentSensors::gui_wait_for_init_with_msg() {
         }
     }
 
+    #if !PRINTER_IS_PRUSA_COREONEL() // Calibrations are optional; an uncalibrated sensor just stays inactive
     if (any_fsensor_in_state(FilamentSensorState::NotCalibrated)) {
         MsgBoxWarning(_("Filament sensor not ready: perform calibration first."), Responses_Ok);
         return false;
     }
+    #endif
 
     return true;
 }

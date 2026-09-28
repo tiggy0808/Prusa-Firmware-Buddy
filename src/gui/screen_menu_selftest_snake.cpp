@@ -236,6 +236,11 @@ void continue_snake() {
             }
 
         } else {
+#if PRINTER_IS_PRUSA_COREONEL()
+            // Calibrations are optional: running one of them does not lead into the others
+            snake_config.reset();
+            return;
+#else
             const auto resp = MsgBoxQuestion(_("Continue running Calibrations & Tests?"), { Response::Continue, Response::All, Response::Quit }, 2);
             switch (resp) {
 
@@ -254,6 +259,7 @@ void continue_snake() {
             default:
                 bsod_unreachable();
             }
+#endif
         }
     }
 
@@ -444,7 +450,8 @@ void ScreenMenuSTSCalibrations::windowEvent(window_t *sender, GUI_event_t event,
 }
 
 bool ScreenMenuSTSWizard::should_show() {
-#if PRINTER_IS_PRUSA_iX()
+#if PRINTER_IS_PRUSA_iX() || PRINTER_IS_PRUSA_COREONEL()
+    // Calibrations are optional; the wizard is still available from the Calibrations & Tests menu
     return false;
 #else
     // A crude heuristic to make the wizard show only "on the first run".

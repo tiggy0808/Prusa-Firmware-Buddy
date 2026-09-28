@@ -938,6 +938,14 @@ enum class RefineResult {
 };
 
 RefineResult corexy_calibrate_homing_during_G28(float xy_mm_s, const G28Flags &flags) {
+#if PRINTER_IS_PRUSA_COREONEL()
+  // Calibrations are optional: "never recalibrate" continues unrefined, even where calibration isn't possible
+  if (!flags.force_calibrate && config_store().auto_recalibrate_precise_homing.get() == Tristate::no) {
+    config_store().precise_homing_instability_history.set(0);
+    return RefineResult::success;
+  }
+#endif
+
   // We cannot calibrate -> this are bad, abort
   if (!flags.can_calibrate) {
     return RefineResult::calibrate_from_menu;

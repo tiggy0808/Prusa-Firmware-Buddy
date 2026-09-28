@@ -29,6 +29,7 @@
 #include <option/has_precise_homing.h>
 #include <option/has_indx.h>
 #include <option/has_print_sheet_detection.h>
+#include <option/has_uneven_bed_prompt.h>
 
 // clang-format off
 
@@ -967,8 +968,10 @@ static constexpr float EXTRUDER_SERVICE_MOVE_E_FACTOR = 576.f / 550.f;
     #define SEGMENT_LEVELED_MOVES
     #define LEVELED_SEGMENT_LENGTH 5.0 // (mm) Length of all segments (except the last one)
 
-    /// (mm) If distance between min and max Z during probing exceeds this value, we offer a Z alignment calibration
-    #define MBL_Z_DIFF_CALIB_WARNING_THRESHOLD 2
+    #if HAS_UNEVEN_BED_PROMPT()
+        /// (mm) If distance between min and max Z during probing exceeds this value, we offer a Z alignment calibration
+        #define MBL_Z_DIFF_CALIB_WARNING_THRESHOLD 2
+    #endif
 #endif
 
 #if ENABLED(AUTO_BED_LEVELING_UBL)

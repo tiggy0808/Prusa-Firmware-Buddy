@@ -20,7 +20,8 @@
 #include <config_store/store_instance.hpp>
 
 bool is_selftest_successfully_completed() {
-#if DEVELOPER_MODE() || !HAS_SELFTEST() || PRINTER_IS_PRUSA_iX()
+#if DEVELOPER_MODE() || !HAS_SELFTEST() || PRINTER_IS_PRUSA_iX() || PRINTER_IS_PRUSA_COREONEL()
+    // Calibrations are optional on CORE One L: never nag about or block on them
     return true;
 #endif
 
