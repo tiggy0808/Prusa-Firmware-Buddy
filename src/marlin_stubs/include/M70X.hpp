@@ -176,10 +176,12 @@ struct PreheatBehavior {
     bool consider_previous_filament : 1;
 
     /// @returns preheat behavior for loads during filament change
-    static PreheatBehavior for_filament_load(bool force_temp = true);
+    /// By default, a higher nozzle temperature set by the user is kept.
+    static PreheatBehavior for_filament_load(bool force_temp = false);
 
     /// @returns preheat behavior for unloads during filament change
-    static PreheatBehavior for_filament_unload(bool force_temp = true);
+    /// By default, a higher nozzle temperature set by the user is kept.
+    static PreheatBehavior for_filament_unload(bool force_temp = false);
 };
 
 std::pair<std::optional<PreheatStatus::Result>, FilamentType> preheat(const FilamentSelectionArgs &selection_args, PreheatBehavior preheat_arg);

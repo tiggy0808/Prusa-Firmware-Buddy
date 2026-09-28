@@ -234,11 +234,14 @@ void CurrentStore::set_side_fs_ref_ins_value(uint8_t index, int32_t value) {
 }
 #endif
 
+// Only whether a filament is loaded is tracked, not its type. Any loaded
+// filament is represented by the tool's ad-hoc filament, whose parameters
+// are the user's load/unload settings.
 FilamentType CurrentStore::get_filament_type([[maybe_unused]] uint8_t index) {
-    if (loaded_filament_is_previous.get()[index]) {
+    if (loaded_filament_is_previous.get()[index] || FilamentType(loaded_filament_type.get(index)) == FilamentType::none) {
         return FilamentType::none;
     }
-    return loaded_filament_type.get(index);
+    return AdHocFilamentType { .tool = index };
 }
 
 void CurrentStore::set_filament_type(VirtualToolIndex virtual_tool, FilamentType value) {
@@ -266,7 +269,7 @@ void CurrentStore::set_filament_type(VirtualToolIndex virtual_tool, FilamentType
             item.set(virtual_tool.to_raw(), true);
         });
     } else {
-        loaded_filament_type.set(virtual_tool.to_raw(), value);
+        loaded_filament_type.set(virtual_tool.to_raw(), FilamentType(AdHocFilamentType { .tool = virtual_tool.to_raw() }));
         loaded_filament_is_previous.apply([&](auto &item) {
             item.set(virtual_tool.to_raw(), false);
         });
@@ -274,8 +277,8 @@ void CurrentStore::set_filament_type(VirtualToolIndex virtual_tool, FilamentType
 }
 
 FilamentType CurrentStore::get_previous_filament_type(VirtualToolIndex tool) {
-    if (loaded_filament_is_previous.get()[tool.to_raw()]) {
-        return loaded_filament_type.get(tool.to_raw());
+    if (loaded_filament_is_previous.get()[tool.to_raw()] && FilamentType(loaded_filament_type.get(tool.to_raw())) != FilamentType::none) {
+        return AdHocFilamentType { .tool = tool.to_raw() };
     } else {
         return FilamentType::none;
     }

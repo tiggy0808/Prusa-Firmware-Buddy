@@ -38,11 +38,11 @@ MI_LOADED_FILAMENT::MI_LOADED_FILAMENT(DisplayFormat display_format, uint8_t too
             sb.append_printf(" %d", tool_.display_index());
         }
 
+        // Only presence is tracked; the item opens the load/unload settings
         sb.append_string(": ");
-        filament_type_.build_name_with_info(sb);
+        sb.append_string_view(filament_type_ != FilamentType::none ? _("Yes") : _("No"));
 
         SetLabel(string_view_utf8::MakeRAM(label_buffer_.data()));
-        set_enabled(filament_type_ != FilamentType::none);
         set_is_hidden(!tool_.is_enabled());
     }
 }
@@ -54,7 +54,7 @@ void MI_LOADED_FILAMENT::click(IWindowMenu &) {
 #if HAS_ANFC()
         Screens::Access()->Open(buddy::openprinttag::screen_opt_info_loaded_creator(tool_));
 #else
-        Screens::Access()->Open(ScreenFactory::ScreenWithArg<ScreenFilamentDetail>(EncodedFilamentType(filament_type_)));
+        Screens::Access()->Open(ScreenFactory::ScreenWithArg<ScreenFilamentDetail>(EncodedFilamentType(AdHocFilamentType { .tool = tool_.to_raw() })));
 #endif
     }
 }

@@ -48,8 +48,8 @@ Config config_from_current_print_setup() {
             continue;
         }
 
-        // Only preselect if we don't have it already
-        if (config_store().get_filament_type(virtual_tool).matches(opt_name)) {
+        // Only preselect if nothing is loaded; the loaded filament type is not tracked
+        if (config_store().get_filament_type(virtual_tool) != FilamentType::none) {
             continue;
         }
 

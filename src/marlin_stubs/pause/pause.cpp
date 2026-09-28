@@ -696,21 +696,7 @@ void Pause::load_wait_temp_process([[maybe_unused]] Response response) {
     if (ensureSafeTemperatureNotifyProgress()) {
         // blocking -> checks for user stop
 
-        const auto filament_to_load = filament::get_type_to_load();
-        if (filament_to_load != NoFilamentType {}) {
-            // We preheated to the higher temeperature of the filament currently
-            // being loaded and the previously loaded filament. Drop the target to
-            // the temperature of the filament currently being loaded just before
-            // loading it into the nozzle (this will drop the nozzle temperature by
-            // itself, overheating the new filament a bit less).
-            thermalManager.setTargetHotend(
-                filament_to_load.parameters().nozzle_temperature,
-                settings.physical_tool());
-
-        } else {
-            // If we don't know the new material (can happen in M600 during print),
-            // keep the original temperature instead of turning the nozzle off :3
-        }
+        // Load at whatever nozzle temperature is set; the user (or the print) is in control of it.
 
         if (load_type == LoadType::load_purge) {
             set(LoadState::purge);
@@ -768,7 +754,9 @@ void Pause::purge_process([[maybe_unused]] Response response) {
     planner.synchronize(); // Finish any pending moves before starting the purge
 
     const auto old_filament = config_store().get_filament_type(settings.virtual_tool());
-    config_store().set_filament_type(settings.virtual_tool(), filament::get_type_to_load());
+    // Purging means filament is loaded, even if nothing told us what it is
+    const FilamentType type_to_load = filament::get_type_to_load();
+    config_store().set_filament_type(settings.virtual_tool(), type_to_load != FilamentType::none ? type_to_load : FilamentType(AdHocFilamentType { .tool = settings.virtual_tool().to_raw() }));
 
 #if HAS_NOZZLE_CLEANER()
     const bool purge_ok = nozzle_cleaner_purge_sequence();

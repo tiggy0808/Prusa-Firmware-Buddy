@@ -73,6 +73,17 @@ PreheatData filament_gcodes::FilamentSelectionArgs::fsm_data() const {
 }
 
 static FSMResponseVariant determine_filament_for_operation(const filament_gcodes::FilamentSelectionArgs &preheat_data) {
+    // The filament type is not tracked, so filament operations never ask for it.
+    // They use the tool's ad-hoc filament, which holds the user's load/unload settings.
+    if (preheat_data.mode != PreheatMode::preheat) {
+        if (const auto tool = stdext::get_optional<VirtualToolIndex>(preheat_data.tool)) {
+            if (preheat_data.mode == PreheatMode::autoload && FSensors_instance().sensor_state(LogicalFilamentSensor::primary_runout) == FilamentSensorState::NoFilament) {
+                return FSMResponseVariant::make(Response::Abort);
+            }
+            return FSMResponseVariant::make(FilamentType(AdHocFilamentType { .tool = tool->to_raw() }));
+        }
+    }
+
     const auto serialized_data = preheat_data.fsm_data().serialize();
 
     const auto deduced_filament_type = [&] {
@@ -272,7 +283,7 @@ filament_gcodes::PreheatBehavior filament_gcodes::PreheatBehavior::for_filament_
 #if HAS_CHAMBER_API()
         .set_chamber_temperature = preheat_all,
 #endif
-        .consider_previous_filament = true,
+        .consider_previous_filament = false,
     };
 }
 
@@ -333,7 +344,7 @@ void filament_gcodes::preheat_to(FilamentType filament, std::variant<PhysicalToo
     }
 
 #if HAS_CHAMBER_API()
-    if (preheat_arg.set_chamber_temperature) {
+    if (preheat_arg.set_chamber_temperature && fil_cnf.chamber_target_temperature.has_value()) {
         buddy::chamber().set_target_temperature(fil_cnf.chamber_target_temperature);
     }
 #endif
@@ -378,7 +389,8 @@ void filament_gcodes::M1700_preheat(const M1700Args &args) {
 #endif
     }
 
-    if (args.preheat_bed) {
+    // A zero bed temperature on a filament means "leave the bed alone"; only cooldown turns it off
+    if (args.preheat_bed && (filament == FilamentType::none || fil_cnf.heatbed_temperature > 0)) {
         thermalManager.setTargetBed(fil_cnf.heatbed_temperature);
     }
 

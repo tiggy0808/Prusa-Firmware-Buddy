@@ -421,27 +421,6 @@ void CompatibilityReport::generate_toolmapping_only_noclear([[maybe_unused]] con
                 return;
             }
 
-            const FilamentType loaded_filament_type = config_store().get_filament_type(virtual_tool);
-            const FilamentTypeParameters loaded_filament_params = loaded_filament_type.parameters();
-
-            // Check filament type and hotend compatibility
-            // Don't report errors if the gcode did not provide the filament type
-            if (const auto &fn = extruder_info.filament_name; !fn.empty() && fn != "---") {
-                if (fn != loaded_filament_params.name) {
-                    virtual_tool_fails.set(VirtualToolCheck::filament_type);
-                }
-
-                const auto gcode_filament = FilamentType::from_name(std::string_view(fn.data()));
-                if (gcode_filament != FilamentType::none) {
-                    const filament_compatibility::CompatibilityReportGenerateArgs args {
-                        .filament = gcode_filament.parameters(),
-                        .tools = virtual_tool,
-                        .assume_filament_already_inserted = true,
-                    };
-                    filament_check_reports[virtual_tool].generate_noclear(args);
-                }
-            }
-
             if (auto dia = extruder_info.nozzle_diameter; dia.has_value() && std::abs(*dia - config_store().get_nozzle_diameter(physical_tool.to_raw())) > 0.001f) {
                 virtual_tool_fails.set(VirtualToolCheck::nozzle_diameter);
             }

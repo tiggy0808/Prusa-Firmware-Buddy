@@ -13,16 +13,13 @@ FilamentType FilamentType::for_tool(std::variant<VirtualToolIndex, NoTool> tool)
 }
 
 FilamentType FilamentType::for_tool_heuristic(std::variant<VirtualToolIndex, NoTool> tool) {
-    if (auto filament = for_tool(tool)) {
-        return filament;
-    }
-
     if (!std::holds_alternative<VirtualToolIndex>(tool)) {
         return FilamentType::none;
     }
     const auto virtual_tool = std::get<VirtualToolIndex>(tool);
 
-    // Try to get data from the GCodeInfo if we're printing
+    // The loaded filament is only tracked as present/absent, so while printing,
+    // the filament the G-code was sliced for describes it best (chamber, filtration, feedrates)
     if (marlin_vars().print_state != marlin_server::State::Idle) {
         for (auto gcode_tool : GcodeToolIndex::all()) {
             if (!stdext::holds_value(gcode_tool.to_virtual(), virtual_tool)) {
@@ -34,6 +31,10 @@ FilamentType FilamentType::for_tool_heuristic(std::variant<VirtualToolIndex, NoT
                 return filament;
             }
         }
+    }
+
+    if (auto filament = for_tool(virtual_tool)) {
+        return filament;
     }
 
     // Last resort - check previously loaded filament

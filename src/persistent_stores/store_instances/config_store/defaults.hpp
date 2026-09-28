@@ -281,9 +281,10 @@ namespace defaults {
         return result;
     }();
 
+    // The ad-hoc filament represents any loaded filament; its temperatures are the load/unload settings
     inline constexpr FilamentTypeParameters_EEPROM1 adhoc_filament_parameters = {
-        .name = "NAME",
-        .nozzle_temperature = 215,
+        .name = "LOADED",
+        .nozzle_temperature = 230,
         .nozzle_preheat_temperature = 170,
     };
 

@@ -73,7 +73,7 @@ void DUMMY_AXIS_E::set_state(ToolState state) {
 }
 
 void DUMMY_AXIS_E::click(IWindowMenu &) {
-    marlin_client::gcode("M1700 S E W2 B0"); // set filament, preheat to target, do not heat bed, return option
+    marlin_client::gcode("M1700 E W2 B0"); // preheat to target, do not heat bed, return option
 }
 
 ScreenMenuMove::ScreenMenuMove()
