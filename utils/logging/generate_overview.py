@@ -12,7 +12,7 @@ ComponentDefintion = namedtuple(
 
 
 def scan_file(file_path: Path):
-    with open(file_path, 'r') as f:
+    with open(file_path, 'r', encoding='utf-8') as f:
         for line_idx, line in enumerate(f.readlines()):
             match = component_def_re.match(line)
             if not match:
@@ -50,8 +50,10 @@ if __name__ == "__main__":
         'This file is generated automatically so don\'t edit it directly',
         '',
     ]
-    for component in sorted(components,
-                            key=lambda c: c.component_name + str(c.file_path)):
+    for component in sorted(
+            components,
+            key=lambda c:
+        (c.component_name, c.file_path.relative_to(project_root).as_posix())):
         component_def_path = component.file_path.relative_to(
             project_root).as_posix()
         doc += [
